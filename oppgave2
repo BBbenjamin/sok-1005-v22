@@ -1,0 +1,37 @@
+library(tidyverse)
+library(data.table)
+library(gdata)
+library(ggplot2)
+library(zoo)
+library(jsonlite)
+library(ggrepel)
+
+
+#Oppgave 1
+data <- fromJSON ("https://static01.nyt.com/newsgraphics/2021/12/20/us-coronavirus-deaths-2021/ff0adde21623e111d8ce103fedecf7ffc7906264/scatter.json?fbclid=IwAR3qRphYO-wmnxb5trFisqA41ltfVmw8CIaSZaHEwrxBJ8oWU0Xhfb8vxO0")
+
+data %>% 
+  ggplot(aes(x= fully_vaccinated_pct_of_pop, y= deaths_per_100k, label=name))+
+  geom_point(col = "Blue")+
+  geom_text_repel(aes(label = name))+
+  labs(x= "fully_vaccinated_pct_of_pop",
+       y= "deaths_per_100k")+
+theme_bw()  
+
+#Oppgave 2
+library(nlme)
+
+lm(deaths_per_100k, fully_vaccinated_pct_of_pop, data = data )
+data %>% 
+  ggplot(aes(x = fully_vaccinated_pct_of_pop, y = deaths_per_100k, label = name))+
+  geom_point(col = "purple")+
+  geom_text_repel(aes(label = name))+
+  geom_smooth(method = lm)
+  labs(x= "fully_vaccinated_pct_of_pop",
+       y= "deaths_per_100k")+
+  theme_bw()  
+#Tolk av de to verdiene på den tilpassede linjen
+  ##Jo flere vaksinerte per stat jo lavere er døden per hver hundre tusende innbygger.
+  ##I stater som Wyoming hvor gjennomsnittet på vaksinerte er på 0.472 er dødstallet 
+  ##over 2000 høyere enn i nærmeste stat.
+  
