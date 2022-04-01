@@ -1,0 +1,14 @@
+def player_strategy(n_battalions,n_fields):
+    #defining the array:
+    battalions=np.zeros(n_fields,dtype=int)
+    
+    #assigning 25 battalions to the first four battle fields:
+    battalions[0:1]=2
+    battalions[1:4]=30
+    battalions[4:]=4
+    
+    #asserting that all and no more than all battalions are used:
+    battalions=battalions[np.random.rand(n_fields).argsort()]
+    assert sum(battalions)==n_battalions
+    
+    return battalions
