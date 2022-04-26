@@ -1,0 +1,58 @@
+library(tidyverse)
+library(proto)
+library(rvest)
+library(httr)
+
+#laster inn html filen
+bil <- read_html("https://www.motor.no/aktuelt/motors-store-vintertest-av-rekkevidde-pa-elbiler/217132")
+
+#gjør om dataen til tabell
+bil <- bil %>% html_table()
+#velger første tabell på nettsiden
+bil <- bil[[1]]
+#velger andre og tredje kolonne
+bil = select(bil, -c(1,4))
+#fjerner første rad som inneholder tekst
+bil=bil[-1,]
+#fjerner karakteren "X"
+bil <- bil[!grepl("x", bil$X3),]
+#erstatter "km" med ingenting
+bil$X3 <- gsub("km","",as.character(bil$X3))
+#gjør om til numerisk
+bil$X3 <- as.numeric(as.character(bil$X3))
+#velger de tre første karakterene i hver ovbservasjon i kolonnen
+bil$X2 <- substr(bil$X2,0,3)
+#gjør om til numerisk
+bil$X2 <- as.numeric(as.character(bil$X2))
+
+#Plotter
+bil %>% 
+  ggplot(aes(x=X2, y=X3))+
+  geom_point(col="red")+
+  geom_abline(col="black")+
+  ylim(200,650)+
+  xlim(200,600)+
+  labs(x="WLTP",
+       y="STOPP")+
+  theme_bw()
+
+#regresjonslinje
+lm(X3 ~ X2, data = bil)
+
+#Plott med regresjonslinje og konfidensintervall
+bil %>% 
+  ggplot(aes(x=X2, y=X3))+
+  geom_point(col="red")+
+  geom_abline(col="black")+
+  geom_smooth(method = lm)+
+  ylim(200,650)+
+  xlim(200,600)+
+  labs(title = "Stopp mot WLTP Test",
+    x="WLTP",
+    y="STOPP")+
+  theme_bw()
+
+#De to verdiene på den tilpassede linjen førlger trenden. Den blå linjen viser at bilene
+#ikke har rekkevidden de reklamerer for. Forskjellen på den svarte og den blå linjen
+#Viser hvordan kulde kan påvirke el-biler samt avviket fra hva produsentene sier at bilen 
+#skal prestere.
